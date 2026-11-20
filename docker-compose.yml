@@ -1,0 +1,37 @@
+# Mi Granjita completo: el juego (web) + MySQL (db).
+# Uso:  docker compose up -d --build     → abre http://IP-DE-TU-VPS/
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${PUERTO:-80}:80"
+    environment:
+      MI_GRANJITA_DB_HOST: db
+      MI_GRANJITA_DB_PORT: "3306"
+      MI_GRANJITA_DB_NAME: mi_granjita
+      MI_GRANJITA_DB_USER: granjita
+      MI_GRANJITA_DB_PASSWORD: ${DB_PASSWORD:?Escribe DB_PASSWORD en el archivo .env}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: mi_granjita
+      MYSQL_USER: granjita
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Escribe DB_PASSWORD en el archivo .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Escribe DB_ROOT_PASSWORD en el archivo .env}
+    volumes:
+      - datos_mysql:/var/lib/mysql                       # las granjas no se pierden al reiniciar
+      - ./database/mi_granjita.sql:/docker-entrypoint-initdb.d/01-mi_granjita.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${DB_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  datos_mysql:

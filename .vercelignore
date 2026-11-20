@@ -1,0 +1,10 @@
+# Vercel solo sirve archivos estáticos: la carpeta api (PHP) y la base de datos no se suben.
+api/
+database/
+*.md
+*.docx
+*.pdf
+Dockerfile
+docker-compose.yml
+.env.example
+.dockerignore

@@ -1,0 +1,6 @@
+.env
+api/config.local.php
+*.md
+*.docx
+*.pdf
+.vercelignore

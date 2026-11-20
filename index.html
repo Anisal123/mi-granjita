@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffeef5">
+  <title>Mi Granjita — granja por turnos multijugador</title>
+  <link rel="stylesheet" href="libs/sweetalert2.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Vue monta aquí el componente App (src/components/App.js). -->
+  <div id="app"><p class="boot-message">Cargando Mi Granjita…</p></div>
+
+  <!-- Copia de src/data/cultivos.json para abrir el juego como archivo local sin servidor.
+       Si cambias el JSON, copia el contenido aquí también. -->
+  <script type="application/json" id="crop-data">
+  {
+    "configuracion": {
+      "monedasIniciales": 45,
+      "semillasIniciales": {
+        "zanahoria": 3,
+        "tomate": 2,
+        "calabaza": 1
+      },
+      "parcelasCompradasIniciales": 3,
+      "precioParcela": 12,
+      "parcelasIniciales": [
+        {
+          "parcela": 2,
+          "cultivo": "tomate",
+          "estado": "growing",
+          "diasRestantes": 1,
+          "regada": true
+        },
+        {
+          "parcela": 3,
+          "cultivo": "zanahoria",
+          "estado": "ready"
+        }
+      ],
+      "puntosMeta": 100,
+      "diasPorSemana": 7
+    },
+    "cultivos": [
+      {
+        "id": "zanahoria",
+        "nombre": "Zanahoria",
+        "diasCrecimiento": 1,
+        "precioSemilla": 5,
+        "precioVenta": 12,
+        "diaDesbloqueo": 1,
+        "descripcion": "Raíz crujiente que crece muy rápido.",
+        "forma": "raiz",
+        "color": "#ed883c"
+      },
+      {
+        "id": "tomate",
+        "nombre": "Tomate",
+        "diasCrecimiento": 2,
+        "precioSemilla": 8,
+        "precioVenta": 18,
+        "diaDesbloqueo": 1,
+        "descripcion": "Un clásico jugoso que vale la espera.",
+        "forma": "redondo",
+        "color": "#e85d48"
+      },
+      {
+        "id": "calabaza",
+        "nombre": "Calabaza",
+        "diasCrecimiento": 3,
+        "precioSemilla": 12,
+        "precioVenta": 30,
+        "diaDesbloqueo": 1,
+        "descripcion": "Grande, colorida y muy rentable.",
+        "forma": "calabaza",
+        "color": "#ec873a"
+      },
+      {
+        "id": "lechuga",
+        "nombre": "Lechuga",
+        "diasCrecimiento": 1,
+        "precioSemilla": 7,
+        "precioVenta": 16,
+        "diaDesbloqueo": 5,
+        "descripcion": "Hojas tiernas para una cosecha veloz.",
+        "forma": "hoja",
+        "color": "#70b94e"
+      },
+      {
+        "id": "maiz",
+        "nombre": "Maíz",
+        "diasCrecimiento": 2,
+        "precioSemilla": 8,
+        "precioVenta": 19,
+        "diaDesbloqueo": 5,
+        "descripcion": "Una mazorca dorada de buen rendimiento.",
+        "forma": "vaina",
+        "color": "#efc546"
+      },
+      {
+        "id": "papa",
+        "nombre": "Papa",
+        "diasCrecimiento": 1,
+        "precioSemilla": 6,
+        "precioVenta": 15,
+        "diaDesbloqueo": 5,
+        "descripcion": "Un tubérculo sencillo y confiable.",
+        "forma": "raiz",
+        "color": "#bc8952"
+      },
+      {
+        "id": "fresa",
+        "nombre": "Fresa",
+        "diasCrecimiento": 2,
+        "precioSemilla": 10,
+        "precioVenta": 24,
+        "diaDesbloqueo": 10,
+        "descripcion": "Frutos rojos y dulces.",
+        "forma": "racimo",
+        "color": "#e85462"
+      },
+      {
+        "id": "cebolla",
+        "nombre": "Cebolla",
+        "diasCrecimiento": 2,
+        "precioSemilla": 7,
+        "precioVenta": 18,
+        "diaDesbloqueo": 10,
+        "descripcion": "Bulbo aromático de crecimiento corto.",
+        "forma": "bulbo",
+        "color": "#c28ac2"
+      },
+      {
+        "id": "pepino",
+        "nombre": "Pepino",
+        "diasCrecimiento": 1,
+        "precioSemilla": 9,
+        "precioVenta": 21,
+        "diaDesbloqueo": 10,
+        "descripcion": "Verde, fresco y rápido de cultivar.",
+        "forma": "oval",
+        "color": "#6aad48"
+      },
+      {
+        "id": "berenjena",
+        "nombre": "Berenjena",
+        "diasCrecimiento": 2,
+        "precioSemilla": 11,
+        "precioVenta": 25,
+        "diaDesbloqueo": 15,
+        "descripcion": "Una hortaliza morada muy especial.",
+        "forma": "oval",
+        "color": "#8655a8"
+      },
+      {
+        "id": "pimiento",
+        "nombre": "Pimiento",
+        "diasCrecimiento": 1,
+        "precioSemilla": 10,
+        "precioVenta": 22,
+        "diaDesbloqueo": 15,
+        "descripcion": "Colorido y fácil de vender.",
+        "forma": "redondo",
+        "color": "#d94d43"
+      },
+      {
+        "id": "rabano",
+        "nombre": "Rábano",
+        "diasCrecimiento": 1,
+        "precioSemilla": 7,
+        "precioVenta": 17,
+        "diaDesbloqueo": 15,
+        "descripcion": "Raíz picante lista en poco tiempo.",
+        "forma": "raiz",
+        "color": "#d95c82"
+      },
+      {
+        "id": "girasol",
+        "nombre": "Girasol",
+        "diasCrecimiento": 2,
+        "precioSemilla": 12,
+        "precioVenta": 27,
+        "diaDesbloqueo": 20,
+        "descripcion": "Una flor brillante que alegra el huerto.",
+        "forma": "flor",
+        "color": "#f0bd3d"
+      },
+      {
+        "id": "ajo",
+        "nombre": "Ajo",
+        "diasCrecimiento": 2,
+        "precioSemilla": 8,
+        "precioVenta": 20,
+        "diaDesbloqueo": 20,
+        "descripcion": "Pequeño bulbo con gran valor.",
+        "forma": "bulbo",
+        "color": "#e8dfc7"
+      },
+      {
+        "id": "brocoli",
+        "nombre": "Brócoli",
+        "diasCrecimiento": 2,
+        "precioSemilla": 11,
+        "precioVenta": 26,
+        "diaDesbloqueo": 20,
+        "descripcion": "Ramilletes verdes nutritivos.",
+        "forma": "flor",
+        "color": "#4b9a54"
+      },
+      {
+        "id": "sandia",
+        "nombre": "Sandía",
+        "diasCrecimiento": 3,
+        "precioSemilla": 16,
+        "precioVenta": 38,
+        "diaDesbloqueo": 25,
+        "descripcion": "Fruta grande y refrescante.",
+        "forma": "redondo",
+        "color": "#55a866"
+      },
+      {
+        "id": "melon",
+        "nombre": "Melón",
+        "diasCrecimiento": 3,
+        "precioSemilla": 15,
+        "precioVenta": 36,
+        "diaDesbloqueo": 25,
+        "descripcion": "Dulce y aromático.",
+        "forma": "redondo",
+        "color": "#e2a847"
+      },
+      {
+        "id": "arveja",
+        "nombre": "Arveja",
+        "diasCrecimiento": 2,
+        "precioSemilla": 8,
+        "precioVenta": 22,
+        "diaDesbloqueo": 25,
+        "descripcion": "Vainas pequeñas de buen precio.",
+        "forma": "vaina",
+        "color": "#79aa49"
+      },
+      {
+        "id": "uva",
+        "nombre": "Uva",
+        "diasCrecimiento": 2,
+        "precioSemilla": 14,
+        "precioVenta": 34,
+        "diaDesbloqueo": 30,
+        "descripcion": "Racimos dulces y jugosos.",
+        "forma": "racimo",
+        "color": "#845bb4"
+      },
+      {
+        "id": "frijol",
+        "nombre": "Frijol",
+        "diasCrecimiento": 2,
+        "precioSemilla": 9,
+        "precioVenta": 23,
+        "diaDesbloqueo": 30,
+        "descripcion": "Una vaina rendidora para tu granja.",
+        "forma": "vaina",
+        "color": "#76a84b"
+      },
+      {
+        "id": "camote",
+        "nombre": "Camote",
+        "diasCrecimiento": 2,
+        "precioSemilla": 11,
+        "precioVenta": 29,
+        "diaDesbloqueo": 30,
+        "descripcion": "Raíz dulce con buena recompensa.",
+        "forma": "raiz",
+        "color": "#bd7045"
+      },
+      {
+        "id": "pina",
+        "nombre": "Piña",
+        "diasCrecimiento": 3,
+        "precioSemilla": 18,
+        "precioVenta": 42,
+        "diaDesbloqueo": 35,
+        "descripcion": "Fruta tropical de alto valor.",
+        "forma": "oval",
+        "color": "#e7ae3d"
+      },
+      {
+        "id": "limon",
+        "nombre": "Limón",
+        "diasCrecimiento": 2,
+        "precioSemilla": 13,
+        "precioVenta": 32,
+        "diaDesbloqueo": 35,
+        "descripcion": "Cítrico, brillante y refrescante.",
+        "forma": "oval",
+        "color": "#d8c84c"
+      },
+      {
+        "id": "manzana",
+        "nombre": "Manzana",
+        "diasCrecimiento": 3,
+        "precioSemilla": 17,
+        "precioVenta": 40,
+        "diaDesbloqueo": 35,
+        "descripcion": "Una fruta clásica y crujiente.",
+        "forma": "redondo",
+        "color": "#df5a4b"
+      },
+      {
+        "id": "mora",
+        "nombre": "Mora",
+        "diasCrecimiento": 2,
+        "precioSemilla": 15,
+        "precioVenta": 35,
+        "diaDesbloqueo": 40,
+        "descripcion": "Bayas oscuras para una cosecha especial.",
+        "forma": "racimo",
+        "color": "#54447f"
+      },
+      {
+        "id": "coliflor",
+        "nombre": "Coliflor",
+        "diasCrecimiento": 3,
+        "precioSemilla": 14,
+        "precioVenta": 34,
+        "diaDesbloqueo": 40,
+        "descripcion": "Una cabeza blanca de gran tamaño.",
+        "forma": "flor",
+        "color": "#e9e3d4"
+      },
+      {
+        "id": "yuca",
+        "nombre": "Yuca",
+        "diasCrecimiento": 3,
+        "precioSemilla": 12,
+        "precioVenta": 31,
+        "diaDesbloqueo": 40,
+        "descripcion": "Raíz firme que recompensa la paciencia.",
+        "forma": "raiz",
+        "color": "#d3b27a"
+      },
+      {
+        "id": "apio",
+        "nombre": "Apio",
+        "diasCrecimiento": 2,
+        "precioSemilla": 10,
+        "precioVenta": 26,
+        "diaDesbloqueo": 45,
+        "descripcion": "Tallos frescos para tu última colección.",
+        "forma": "hoja",
+        "color": "#69a84d"
+      },
+      {
+        "id": "mango",
+        "nombre": "Mango",
+        "diasCrecimiento": 3,
+        "precioSemilla": 18,
+        "precioVenta": 44,
+        "diaDesbloqueo": 45,
+        "descripcion": "Fruta tropical muy apreciada.",
+        "forma": "oval",
+        "color": "#ee9b3f"
+      },
+      {
+        "id": "cereza",
+        "nombre": "Cereza",
+        "diasCrecimiento": 2,
+        "precioSemilla": 16,
+        "precioVenta": 40,
+        "diaDesbloqueo": 45,
+        "descripcion": "Pequeños frutos dulces en racimo.",
+        "forma": "racimo",
+        "color": "#bd3e53"
+      }
+    ],
+    "eventosCalendario": [
+      {
+        "dia": 3,
+        "tipo": "lluvia",
+        "nombre": "Lluvia suave",
+        "descripcion": "La lluvia riega automáticamente las parcelas plantadas.",
+        "icon": "cloud-rain"
+      },
+      {
+        "dia": 5,
+        "tipo": "feria",
+        "nombre": "Feria del pueblo",
+        "descripcion": "Las cosechas se venden por el doble de su precio habitual.",
+        "multiplicadorVenta": 2,
+        "icon": "party-popper"
+      },
+      {
+        "dia": 7,
+        "tipo": "descuento-semillas",
+        "nombre": "Mercado de semillas",
+        "descripcion": "Las semillas tienen 25% de descuento.",
+        "descuento": 0.25,
+        "icon": "badge-percent"
+      }
+    ],
+    "personajes": [
+      {
+        "id": "gato",
+        "nombre": "Michi",
+        "especie": "Gato",
+        "forma": "gato",
+        "color": "#ffc993",
+        "detalle": "#fff4e6",
+        "descripcion": "Curioso y valiente, siempre el primero en llegar a la parcela con su brotecito en la cabeza."
+      },
+      {
+        "id": "conejo",
+        "nombre": "Saltarín",
+        "especie": "Conejo",
+        "forma": "conejo",
+        "color": "#fffaf6",
+        "detalle": "#f3c9dc",
+        "descripcion": "Le encantan las zanahorias y salta de surco en surco con su bufanda amarilla."
+      },
+      {
+        "id": "oveja",
+        "nombre": "Lanita",
+        "especie": "Oveja",
+        "forma": "oveja",
+        "color": "#dcb5a4",
+        "detalle": "#fffaf2",
+        "descripcion": "Tranquila y paciente, cuida cada brote con su lana suave y una florecita."
+      }
+    ],
+    "herramientas": [
+      {
+        "id": "pala",
+        "nombre": "Pala",
+        "icon": "shovel",
+        "accion": "Plantar semillas"
+      },
+      {
+        "id": "regadera",
+        "nombre": "Regadera",
+        "icon": "droplets",
+        "accion": "Regar cultivos"
+      },
+      {
+        "id": "cesta",
+        "nombre": "Cesta",
+        "icon": "shopping-basket",
+        "accion": "Cosechar cultivos listos"
+      }
+    ]
+  }
+  </script>
+  <script src="libs/vue.global.prod.js"></script>
+  <script src="libs/vue-demi.iife.js"></script>
+  <script src="libs/pinia.iife.prod.js"></script>
+  <script src="libs/phaser.min.js"></script>
+  <script src="libs/lucide.min.js"></script>
+  <script src="libs/sweetalert2.all.min.js"></script>
+  <script src="src/events/eventos.js"></script>
+  <script src="src/audio/sonido.js"></script>
+  <script src="src/data/catalogo.js"></script>
+  <script src="src/components/arte.js"></script>
+  <script src="src/stores/farmStore.js"></script>
+  <script src="src/stores/api.js"></script>
+  <script src="src/stores/villageStore.js"></script>
+  <script src="src/scenes/dibujos.js"></script>
+  <script src="src/scenes/comun.js"></script>
+  <script src="src/scenes/BootScene.js"></script>
+  <script src="src/scenes/MenuScene.js"></script>
+  <script src="src/scenes/FarmScene.js"></script>
+  <script src="src/scenes/SummaryScene.js"></script>
+  <script src="src/components/comunes.js"></script>
+  <script src="src/components/SoundControls.js"></script>
+  <script src="src/components/StoryIntro.js"></script>
+  <script src="src/components/WelcomeScreen.js"></script>
+  <script src="src/components/FarmPanel.js"></script>
+  <script src="src/components/ShopPanel.js"></script>
+  <script src="src/components/InventoryPanel.js"></script>
+  <script src="src/components/CalendarPanel.js"></script>
+  <script src="src/components/VillagePanel.js"></script>
+  <script src="src/components/App.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
